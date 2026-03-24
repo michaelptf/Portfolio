@@ -1,12 +1,14 @@
 package com.michael.portfolio.service;
 
 import com.michael.portfolio.model.Portfolio;
+import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.repository.PortfolioRepository;
 import org.springframework.stereotype.Service;
 
 import javax.sound.sampled.Port;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PortfolioService {
@@ -46,6 +48,15 @@ public class PortfolioService {
             current = current.getParent();
         }
         return count;
+
+    }
+
+    public void addTradeToPortfolio(Long id, Trade trade) {
+        Optional<Portfolio> portfolio = portfolioRepository.findPortfolioById(id);
+        if(portfolio.isEmpty()){
+            throw new IllegalArgumentException("Portfolio Id doesn't exist");
+        }
+        portfolio.get().getTrades().add(trade);
 
     }
 }

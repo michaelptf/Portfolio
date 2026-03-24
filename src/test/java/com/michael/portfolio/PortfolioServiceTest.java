@@ -1,6 +1,7 @@
 package com.michael.portfolio;
 
 import com.michael.portfolio.model.Portfolio;
+import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.repository.PortfolioRepository;
 import com.michael.portfolio.service.PortfolioService;
 import jakarta.transaction.Transactional;
@@ -113,5 +114,25 @@ public class PortfolioServiceTest {
         assertFalse(foundChild.isPresent());  // child gone too
 
     }
+
+    @Test
+    void testAddTradeToPortfolio() {
+        // Arrange
+        Portfolio saved = portfolioService.createPortfolio(root);
+        Trade trade = new Trade();
+        trade.setProductType("ETF");
+        trade.setQuantity(100);
+        trade.setPrice(50.0);
+
+        // Act
+        portfolioService.addTradeToPortfolio(saved.getId(), trade);
+
+        // Assert
+        Optional<Portfolio> found = portfolioRepository.findPortfolioById(saved.getId());
+        assertTrue(found.isPresent());
+        assertEquals(1, found.get().getTrades().size());
+        assertEquals("ETF", found.get().getTrades().get(0).getProductType());
+    }
+
 
 }
