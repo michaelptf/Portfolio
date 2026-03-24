@@ -134,5 +134,24 @@ public class PortfolioServiceTest {
         assertEquals("ETF", found.get().getTrades().get(0).getProductType());
     }
 
+    @Test
+    void testFetchTradesByPortfolio() {
+        // Arrange
+        Portfolio saved = portfolioService.createPortfolio(root);
+        Trade trade1 = new Trade("ETF", 100, 50.0);
+        Trade trade2 = new Trade("Bond", 200, 100.0);
+        portfolioService.addTradeToPortfolio(saved.getId(), trade1);
+        portfolioService.addTradeToPortfolio(saved.getId(), trade2);
+
+        // Act
+        List<Trade> trades = portfolioService.getTradesByPortfolio(saved.getId());
+
+        // Assert
+        assertEquals(2, trades.size());
+        assertEquals("ETF", trades.get(0).getProductType());
+        assertEquals("Bond", trades.get(1).getProductType());
+    }
+
+
 
 }

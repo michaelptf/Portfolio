@@ -59,4 +59,12 @@ public class PortfolioService {
         portfolio.get().getTrades().add(trade);
 
     }
+
+    public List<Trade> getTradesByPortfolio(Long id) {
+        Optional<Portfolio> portfolio = portfolioRepository.findPortfolioById(id);
+        if(portfolio.isEmpty()){
+            throw new IllegalArgumentException("Portfolio Id doesn't exist");
+        }
+        return portfolio.get().getTrades();
+    }
 }

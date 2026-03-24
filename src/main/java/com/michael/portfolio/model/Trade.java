@@ -18,6 +18,16 @@ public class Trade {
     private double price;
     private String ticker;
 
+    public Trade(String productType, int quantity, double price) {
+        this.productType = productType;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
+    public Trade() {
+
+    }
+
     public Long getId() {
         return id;
     }
