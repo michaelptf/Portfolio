@@ -37,7 +37,9 @@ public class PortfolioServiceTest {
         child.setName("Child");
         child.setParent(root);
 
-        root.setChildren(List.of(child));
+        List<Portfolio> children = new ArrayList<>();
+        children.add(child);
+        root.setChildren(children);
     }
 
     @Test
@@ -91,6 +93,25 @@ public class PortfolioServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             portfolioService.addChildPortfolio(tooDeep, finalCurrent); // finalCurrent is depth 5
         });
+
+
+    }
+
+    @Test
+    void testDeletePortfolio() {
+        //Act
+        Portfolio saved = portfolioService.createPortfolio(root);
+        Long childId = child.getId();
+        portfolioRepository.save(saved);
+        portfolioService.deletePortfolio(saved);
+
+
+        // Assert
+        Optional<Portfolio> foundParent = portfolioRepository.findPortfolioById(saved.getId());
+        Optional<Portfolio> foundChild = portfolioRepository.findPortfolioById(childId);
+        assertFalse(foundParent.isPresent()); // parent gone
+        assertFalse(foundChild.isPresent());  // child gone too
+
     }
 
 }

@@ -5,6 +5,7 @@ import com.michael.portfolio.repository.PortfolioRepository;
 import org.springframework.stereotype.Service;
 
 import javax.sound.sampled.Port;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,11 +20,17 @@ public class PortfolioService {
 
         return portfolioRepository.save(portfolio);
     }
+    public void deletePortfolio(Portfolio portfolio) {
+        portfolioRepository.delete(portfolio);
+    }
 
     public void addChildPortfolio(Portfolio child, Portfolio parent) {
         int depth = calculateDepth(parent);
         if(depth >= 5){
             throw new IllegalArgumentException("Portfolio depth cannot exceed 5");
+        }
+        if (parent.getChildren() == null) {
+            parent.setChildren(new ArrayList<>());
         }
         child.setParent(parent);
         parent.getChildren().add(child);

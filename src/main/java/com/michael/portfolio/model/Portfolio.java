@@ -17,7 +17,7 @@ public class Portfolio {
     @JoinColumn(name = "parent_id")
     private Portfolio parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Portfolio> children = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
