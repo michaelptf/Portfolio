@@ -2,9 +2,9 @@ package com.michael.portfolio.service;
 
 import com.michael.portfolio.model.Portfolio;
 import com.michael.portfolio.repository.PortfolioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class PortfolioService {
@@ -13,9 +13,16 @@ public class PortfolioService {
     public PortfolioService(PortfolioRepository portfolioRepository) {
         this.portfolioRepository = portfolioRepository;
     }
-    public Portfolio createPortfolio(Portfolio root) {
+    public Portfolio createPortfolio(Portfolio portfolio) {
 
 
-        return portfolioRepository.save(root);
+        return portfolioRepository.save(portfolio);
+    }
+
+    public void addChildPortfolio(Portfolio child, Portfolio parent) {
+        child.setParent(parent);
+        parent.getChildren().add(child);
+        portfolioRepository.save(parent);
+
     }
 }

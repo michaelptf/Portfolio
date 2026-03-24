@@ -54,4 +54,21 @@ public class PortfolioServiceTest {
 
     }
 
+    @Test
+    void testAddChildPortfolio(){
+        //Act
+        Portfolio saved = portfolioService.createPortfolio(root);
+        Portfolio child2 = new Portfolio();
+        child2.setName("Child2");
+        portfolioService.addChildPortfolio(child2, saved);
+
+        //Assert
+        Optional<Portfolio> found = portfolioRepository.findPortfolioById(saved.getId());
+        assertTrue(found.isPresent());
+        assertEquals(2, found.get().getChildren().size());
+        assertEquals("Child2", found.get().getChildren().get(1).getName());
+
+
+    }
+
 }
