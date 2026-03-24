@@ -19,9 +19,10 @@ public class Trade {
     private String ticker;
 
     public Trade(String productType, int quantity, double price) {
-        this.productType = productType;
-        this.quantity = quantity;
-        this.price = price;
+
+        setProductType(productType);
+        setQuantity(quantity);
+        setPrice(price);
     }
 
     public Trade() {
@@ -57,6 +58,9 @@ public class Trade {
     }
 
     public void setQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("quantity cannot be negative number");
+        }
         this.quantity = quantity;
     }
 

@@ -152,6 +152,31 @@ public class PortfolioServiceTest {
         assertEquals("Bond", trades.get(1).getProductType());
     }
 
+    @Test
+    void testRejectNegativeTradeQuantity() {
+        Portfolio saved = portfolioService.createPortfolio(root);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Trade invalidTrade = new Trade("ETF", -10, 50.0);
+            portfolioService.addTradeToPortfolio(saved.getId(), invalidTrade);
+        });
+    }
+
+    @Test
+    void testRejectPortfolioWithoutName() {
+        Portfolio unnamed = new Portfolio();
+        assertThrows(IllegalArgumentException.class, () -> {
+            portfolioService.createPortfolio(unnamed);
+        });
+    }
+
+    @Test
+    void testRejectCircularRelation() {
+        Portfolio saved = portfolioService.createPortfolio(root);
+        // Trying to set root as its own child
+        assertThrows(IllegalArgumentException.class, () -> {
+            portfolioService.addChildPortfolio(root, root);
+        });
+    }
 
 
 }

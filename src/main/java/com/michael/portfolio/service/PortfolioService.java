@@ -19,7 +19,9 @@ public class PortfolioService {
     }
     public Portfolio createPortfolio(Portfolio portfolio) {
 
-
+        if(portfolio.getName() == null){
+            throw new IllegalArgumentException("Name cannot be empty");
+        }
         return portfolioRepository.save(portfolio);
     }
     public void deletePortfolio(Portfolio portfolio) {
@@ -27,6 +29,9 @@ public class PortfolioService {
     }
 
     public void addChildPortfolio(Portfolio child, Portfolio parent) {
+        if (hasCircularRelation(parent, child)) {
+            throw new IllegalArgumentException("Circular relation detected");
+        }
         int depth = calculateDepth(parent);
         if(depth >= 5){
             throw new IllegalArgumentException("Portfolio depth cannot exceed 5");
@@ -51,12 +56,30 @@ public class PortfolioService {
 
     }
 
-    public void addTradeToPortfolio(Long id, Trade trade) {
-        Optional<Portfolio> portfolio = portfolioRepository.findPortfolioById(id);
-        if(portfolio.isEmpty()){
-            throw new IllegalArgumentException("Portfolio Id doesn't exist");
+    private boolean hasCircularRelation(Portfolio parent, Portfolio child) {
+        Portfolio current = parent;
+        while (current != null) {
+            if (current.equals(child)) {
+                return true; // circular detected
+            }
+            current = current.getParent();
         }
-        portfolio.get().getTrades().add(trade);
+        return false;
+    }
+
+
+    public void addTradeToPortfolio(Long id, Trade trade) {
+//        if (trade.getQuantity() < 0) {
+//            throw new IllegalArgumentException("Quantity cannot be negative");
+//        }
+//        if (trade.getPrice() < 0) {
+//            throw new IllegalArgumentException("Price cannot be negative");
+//        }
+        Portfolio portfolio = portfolioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
+        trade.setPortfolio(portfolio);
+        portfolio.getTrades().add(trade);
+        portfolioRepository.save(portfolio);
 
     }
 
