@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -69,6 +69,28 @@ public class PortfolioServiceTest {
         assertEquals("Child2", found.get().getChildren().get(1).getName());
 
 
+    }
+
+    @Test
+    void shouldRejectPortfolioBeyondDepthLimit() {
+
+        Portfolio current = root;
+        // build depth = 5
+        for (int i = 1; i <= 5; i++) {
+            Portfolio child = new Portfolio();
+            child.setName("Child " + i);
+            child.setParent(current);
+            current.setChildren(new ArrayList<>(List.of(child)));
+            current = child;
+        }
+
+        Portfolio tooDeep = new Portfolio();
+        tooDeep.setName("Too Deep");
+
+        Portfolio finalCurrent = current;
+        assertThrows(IllegalArgumentException.class, () -> {
+            portfolioService.addChildPortfolio(tooDeep, finalCurrent); // finalCurrent is depth 5
+        });
     }
 
 }
