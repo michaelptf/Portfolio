@@ -1,5 +1,6 @@
 package com.michael.portfolio.controller;
 import com.michael.portfolio.model.Portfolio;
+import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.repository.PortfolioRepository;
 import com.michael.portfolio.service.PortfolioService;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +44,12 @@ public class PortfolioController {
     public ResponseEntity<Portfolio> deletePortfolio(@PathVariable long id){
         portfolioService.deletePortfolio(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/trade")
+    public ResponseEntity<Trade> addTrade(@PathVariable long id, @RequestBody Trade trade){
+        portfolioService.addTradeToPortfolio(id, trade);
+        return ResponseEntity.ok(trade);
     }
 }
 

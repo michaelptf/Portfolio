@@ -17,13 +17,14 @@ public class PortfolioService {
     public PortfolioService(PortfolioRepository portfolioRepository) {
         this.portfolioRepository = portfolioRepository;
     }
-    public Portfolio createPortfolio(Portfolio portfolio) {
 
+    public Portfolio createPortfolio(Portfolio portfolio) {
         if(portfolio.getName() == null){
             throw new IllegalArgumentException("Name cannot be empty");
         }
         return portfolioRepository.save(portfolio);
     }
+
     public void deletePortfolio(Long id) {
         portfolioRepository.deletePortfolioById(id);
     }

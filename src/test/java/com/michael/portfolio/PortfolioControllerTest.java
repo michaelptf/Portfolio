@@ -4,6 +4,7 @@ package com.michael.portfolio;
 import com.michael.portfolio.controller.PortfolioController;
 import com.michael.portfolio.model.Portfolio;
 
+import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.repository.PortfolioRepository;
 import com.michael.portfolio.service.PortfolioService;
 import org.junit.jupiter.api.Test;
@@ -84,5 +85,28 @@ class PortfolioControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(portfolioService, times(1)).deletePortfolio(1L);
+    }
+
+    @Test
+    void testAddTradeToPortfolio() throws Exception {
+        Portfolio portfolio = new Portfolio();
+        portfolio.setId(1L);
+        portfolio.setName("Root Portfolio");
+
+        Trade trade = new Trade();
+        trade.setId(1L);
+        trade.setProductType("Warrant");
+        trade.setQuantity(10);
+        trade.setPrice(100.00);
+
+        // Mock service behavior
+        doNothing().when(portfolioService).addTradeToPortfolio(portfolio.getId(), trade);
+
+        mockMvc.perform(post("/portfolios/1/trade")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(trade)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productType").value("Warrant"));
+        verify(portfolioService, times(1)).addTradeToPortfolio(eq(1L), any(Trade.class));
     }
 }
