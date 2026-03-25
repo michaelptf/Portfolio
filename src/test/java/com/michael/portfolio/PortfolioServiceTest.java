@@ -63,7 +63,7 @@ public class PortfolioServiceTest {
         Portfolio saved = portfolioService.createPortfolio(root);
         Portfolio child2 = new Portfolio();
         child2.setName("Child2");
-        portfolioService.addChildPortfolio(child2, saved);
+        portfolioService.addChildPortfolio(child2, saved.getId());
 
         //Assert
         Optional<Portfolio> found = portfolioRepository.findPortfolioById(saved.getId());
@@ -92,7 +92,7 @@ public class PortfolioServiceTest {
 
         Portfolio finalCurrent = current;
         assertThrows(IllegalArgumentException.class, () -> {
-            portfolioService.addChildPortfolio(tooDeep, finalCurrent); // finalCurrent is depth 5
+            portfolioService.addChildPortfolio(tooDeep, finalCurrent.getId()); // finalCurrent is depth 5
         });
 
 
@@ -174,7 +174,7 @@ public class PortfolioServiceTest {
         Portfolio saved = portfolioService.createPortfolio(root);
         // Trying to set root as its own child
         assertThrows(IllegalArgumentException.class, () -> {
-            portfolioService.addChildPortfolio(root, root);
+            portfolioService.addChildPortfolio(root, root.getId());
         });
     }
 

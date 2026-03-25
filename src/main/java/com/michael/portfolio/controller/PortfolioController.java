@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.sound.sampled.Port;
 import java.util.Optional;
 
 @RestController
@@ -50,6 +51,12 @@ public class PortfolioController {
     public ResponseEntity<Trade> addTrade(@PathVariable long id, @RequestBody Trade trade){
         portfolioService.addTradeToPortfolio(id, trade);
         return ResponseEntity.ok(trade);
+    }
+
+    @PostMapping("/{id}/child")
+    public ResponseEntity<Portfolio> addChildPortfolio(@PathVariable long id, @RequestBody Portfolio childPortfolio){
+        portfolioService.addChildPortfolio(childPortfolio, id);
+        return ResponseEntity.ok(childPortfolio);
     }
 }
 

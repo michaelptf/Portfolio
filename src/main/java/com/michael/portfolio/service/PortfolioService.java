@@ -29,7 +29,10 @@ public class PortfolioService {
         portfolioRepository.deletePortfolioById(id);
     }
 
-    public void addChildPortfolio(Portfolio child, Portfolio parent) {
+    public void addChildPortfolio(Portfolio child, Long parentId) {
+        Portfolio parent = portfolioRepository.findById(parentId)
+                .orElseThrow(() -> new IllegalArgumentException("Parent not found"));
+
         if (hasCircularRelation(parent, child)) {
             throw new IllegalArgumentException("Circular relation detected");
         }

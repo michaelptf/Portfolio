@@ -109,4 +109,26 @@ class PortfolioControllerTest {
                 .andExpect(jsonPath("$.productType").value("Warrant"));
         verify(portfolioService, times(1)).addTradeToPortfolio(eq(1L), any(Trade.class));
     }
+
+    @Test
+    void testAddPortfolioToPortfolio() throws Exception {
+        Portfolio portfolio = new Portfolio();
+        portfolio.setId(1L);
+        portfolio.setName("Root Portfolio");
+
+        Portfolio childPortfolio = new Portfolio();
+        childPortfolio.setId(2L);
+        childPortfolio.setName("Child Portfolio");
+
+
+        // Mock service behavior
+        doNothing().when(portfolioService).addChildPortfolio(childPortfolio, portfolio.getId());
+
+        mockMvc.perform(post("/portfolios/1/child")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(childPortfolio)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Child Portfolio"));
+        verify(portfolioService, times(1)).addChildPortfolio(any(Portfolio.class), eq(1L));
+    }
 }
