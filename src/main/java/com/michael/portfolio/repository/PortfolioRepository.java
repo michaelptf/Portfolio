@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     Optional<Portfolio> findPortfolioById(Long id);
     List<Portfolio> findByParentId(Long id);
+    void deletePortfolioById(Long id);
 
 }

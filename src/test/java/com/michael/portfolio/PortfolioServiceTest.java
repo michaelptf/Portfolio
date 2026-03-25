@@ -104,7 +104,7 @@ public class PortfolioServiceTest {
         Portfolio saved = portfolioService.createPortfolio(root);
         Long childId = child.getId();
         portfolioRepository.save(saved);
-        portfolioService.deletePortfolio(saved);
+        portfolioService.deletePortfolio(saved.getId());
 
 
         // Assert

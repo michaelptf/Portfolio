@@ -24,8 +24,8 @@ public class PortfolioService {
         }
         return portfolioRepository.save(portfolio);
     }
-    public void deletePortfolio(Portfolio portfolio) {
-        portfolioRepository.delete(portfolio);
+    public void deletePortfolio(Long id) {
+        portfolioRepository.deletePortfolioById(id);
     }
 
     public void addChildPortfolio(Portfolio child, Portfolio parent) {
@@ -89,5 +89,9 @@ public class PortfolioService {
             throw new IllegalArgumentException("Portfolio Id doesn't exist");
         }
         return portfolio.get().getTrades();
+    }
+
+    public Optional<Portfolio> findPortfolioById(long id) {
+        return portfolioRepository.findPortfolioById(id);
     }
 }
