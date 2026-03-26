@@ -16,11 +16,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/portfolios")
 public class PortfolioController {
-    private final PortfolioRepository portfolioRepository;
     private final PortfolioService portfolioService;
 
-    public PortfolioController(PortfolioRepository portfolioRepository, PortfolioService portfolioService) {
-        this.portfolioRepository = portfolioRepository;
+    public PortfolioController(PortfolioService portfolioService) {
         this.portfolioService = portfolioService;
     }
 
