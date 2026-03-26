@@ -30,6 +30,9 @@ public class PortfolioService {
     }
 
     public void addChildPortfolio(Portfolio child, Long parentId) {
+        if (parentId == null) {
+            throw new IllegalArgumentException("Parent portfolio ID must not be null");
+        }
         Portfolio parent = portfolioRepository.findById(parentId)
                 .orElseThrow(() -> new IllegalArgumentException("Parent not found"));
 
