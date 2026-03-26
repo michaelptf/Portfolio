@@ -3,12 +3,14 @@ import com.michael.portfolio.model.Portfolio;
 import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.repository.PortfolioRepository;
 import com.michael.portfolio.service.PortfolioService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.sound.sampled.Port;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -29,7 +31,6 @@ public class PortfolioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Portfolio> getPortfolioById(@PathVariable long id){
-        Optional<Portfolio> portfolio = portfolioService.findPortfolioById(id);
         return portfolioService.findPortfolioById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -57,6 +58,25 @@ public class PortfolioController {
     public ResponseEntity<Portfolio> addChildPortfolio(@PathVariable long id, @RequestBody Portfolio childPortfolio){
         portfolioService.addChildPortfolio(childPortfolio, id);
         return ResponseEntity.ok(childPortfolio);
+    }
+
+    @GetMapping("/{id}/all")
+    public ResponseEntity<List<Portfolio>> getAllChildPortfolios(@PathVariable long id) {
+        List<Portfolio> childList = portfolioService.findAllChildPortfolio(id);
+        return ResponseEntity.ok(childList);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Portfolio> updatePortfolio(@PathVariable long id,
+                                                     @RequestBody Portfolio portfolio) {
+        // TODO: implement update logic
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    @GetMapping("/{id}/trades")
+    public ResponseEntity<List<Trade>> getTrades(@PathVariable long id) {
+        // TODO: implement service call
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 }
 

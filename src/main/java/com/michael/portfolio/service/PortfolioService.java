@@ -3,6 +3,8 @@ package com.michael.portfolio.service;
 import com.michael.portfolio.model.Portfolio;
 import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.repository.PortfolioRepository;
+import com.michael.portfolio.repository.TradeRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import javax.sound.sampled.Port;
@@ -13,9 +15,11 @@ import java.util.Optional;
 @Service
 public class PortfolioService {
     private final PortfolioRepository portfolioRepository;
+    private final TradeRepository tradeRepository;
 
-    public PortfolioService(PortfolioRepository portfolioRepository) {
+    public PortfolioService(PortfolioRepository portfolioRepository, TradeRepository tradeRepository) {
         this.portfolioRepository = portfolioRepository;
+        this.tradeRepository = tradeRepository;
     }
 
     public Portfolio createPortfolio(Portfolio portfolio) {
@@ -74,23 +78,16 @@ public class PortfolioService {
         return false;
     }
 
-
-    public void addTradeToPortfolio(Long id, Trade trade) {
-//        if (trade.getQuantity() < 0) {
-//            throw new IllegalArgumentException("Quantity cannot be negative");
-//        }
-//        if (trade.getPrice() < 0) {
-//            throw new IllegalArgumentException("Price cannot be negative");
-//        }
+    @Transactional
+    public void addTradeToPortfolio(long id, Trade trade) {
         Portfolio portfolio = portfolioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
         trade.setPortfolio(portfolio);
-        portfolio.getTrades().add(trade);
-        portfolioRepository.save(portfolio);
+        tradeRepository.save(trade);
 
     }
 
-    public List<Trade> getTradesByPortfolio(Long id) {
+    public List<Trade> getTradesByPortfolio(long id) {
         Optional<Portfolio> portfolio = portfolioRepository.findPortfolioById(id);
         if(portfolio.isEmpty()){
             throw new IllegalArgumentException("Portfolio Id doesn't exist");
@@ -100,5 +97,9 @@ public class PortfolioService {
 
     public Optional<Portfolio> findPortfolioById(long id) {
         return portfolioRepository.findPortfolioById(id);
+    }
+
+    public List<Portfolio> findAllChildPortfolio(long id){
+        return portfolioRepository.findByParentId(id);
     }
 }

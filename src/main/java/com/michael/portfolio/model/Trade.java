@@ -1,6 +1,7 @@
 package com.michael.portfolio.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,6 +12,7 @@ public class Trade {
 
     @ManyToOne
     @JoinColumn(name = "portfolio_id")
+    @JsonIgnore
     private Portfolio portfolio;
 
     private String productType; // ETF, Warrant, DLC
