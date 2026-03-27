@@ -108,7 +108,6 @@ public class PortfolioService {
                 .orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
 
         existing.setName(updatedPortfolio.getName());
-        // add other fields as needed
         return portfolioRepository.save(existing);
     }
 }

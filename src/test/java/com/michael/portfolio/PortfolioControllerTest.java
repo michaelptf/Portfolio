@@ -6,7 +6,9 @@ import com.michael.portfolio.model.Portfolio;
 
 import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.repository.PortfolioRepository;
+import com.michael.portfolio.repository.TradeRepository;
 import com.michael.portfolio.service.PortfolioService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -34,8 +36,24 @@ class PortfolioControllerTest {
     @MockitoBean
     private PortfolioRepository portfolioRepository;
 
+    @MockitoBean
+    private TradeRepository tradeRepository;
+
     @Autowired
     private ObjectMapper objectMapper;
+
+    private Portfolio parent;
+
+    @BeforeEach
+    void setup() {
+        tradeRepository.deleteAll();
+        portfolioRepository.deleteAll();
+
+        parent = new Portfolio();
+        parent.setName("Parent Portfolio");
+        portfolioRepository.save(parent);
+
+    }
 
     @Test
     void testSayHello() throws Exception {
@@ -135,19 +153,20 @@ class PortfolioControllerTest {
 
     @Test
     void testUpdatePortfolio() throws Exception {
-        Portfolio parent = new Portfolio();
-        parent.setName("Parent Portfolio");
-        portfolioRepository.save(parent);
+
+        parent = portfolioRepository.save(parent);
         Portfolio updated = new Portfolio();
+        updated.setId(1L);
         updated.setName("Updated Portfolio");
 
-        mockMvc.perform(put("/portfolios/" + parent.getId())
+        when(portfolioService.updatePortfolio(eq(1L), any(Portfolio.class)))
+                .thenReturn(updated);
+
+        mockMvc.perform(put("/portfolios/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updated)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Updated Portfolio"));
 
-        Portfolio reloaded = portfolioRepository.findById(parent.getId()).orElseThrow();
-        assertThat(reloaded.getName()).isEqualTo("Updated Portfolio");
     }
 }
