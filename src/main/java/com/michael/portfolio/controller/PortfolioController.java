@@ -71,8 +71,8 @@ public class PortfolioController {
 
     @GetMapping("/{id}/trades")
     public ResponseEntity<List<Trade>> getTrades(@PathVariable long id) {
-        // TODO: implement service call
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        List<Trade> tradeList = portfolioService.getTradesByPortfolio(id);
+        return ResponseEntity.ok(tradeList);
     }
 }
 

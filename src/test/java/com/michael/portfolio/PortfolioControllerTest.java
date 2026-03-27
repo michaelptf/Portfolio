@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -168,5 +169,26 @@ class PortfolioControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Updated Portfolio"));
 
+    }
+
+    @Test
+    void testGetTrades() throws Exception {
+        Trade trade = new Trade();
+        trade.setId(1L);
+        trade.setProductType("Warrant");
+        trade.setQuantity(10);
+        trade.setPrice(100.00);
+
+        parent.setTrades(List.of(trade));
+        parent = portfolioRepository.save(parent);
+
+        // Mock service behavior
+        when(portfolioService.getTradesByPortfolio(1L)).thenReturn(List.of(trade));
+
+        mockMvc.perform(get("/portfolios/1/trades"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].productType").value("Warrant"))
+                .andExpect(jsonPath("$[0].quantity").value(10))
+                .andExpect(jsonPath("$[0].price").value(100.00));
     }
 }
