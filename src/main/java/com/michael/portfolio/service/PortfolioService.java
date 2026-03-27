@@ -101,4 +101,14 @@ public class PortfolioService {
     public List<Portfolio> findAllChildPortfolio(long id){
         return portfolioRepository.findByParentId(id);
     }
+
+    @Transactional
+    public Portfolio updatePortfolio(long id, Portfolio updatedPortfolio) {
+        Portfolio existing = portfolioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
+
+        existing.setName(updatedPortfolio.getName());
+        // add other fields as needed
+        return portfolioRepository.save(existing);
+    }
 }

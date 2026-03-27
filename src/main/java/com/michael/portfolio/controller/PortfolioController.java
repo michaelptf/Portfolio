@@ -1,7 +1,6 @@
 package com.michael.portfolio.controller;
 import com.michael.portfolio.model.Portfolio;
 import com.michael.portfolio.model.Trade;
-import com.michael.portfolio.repository.PortfolioRepository;
 import com.michael.portfolio.service.PortfolioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,9 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.sound.sampled.Port;
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/portfolios")
@@ -67,8 +65,8 @@ public class PortfolioController {
     @PutMapping("/{id}")
     public ResponseEntity<Portfolio> updatePortfolio(@PathVariable long id,
                                                      @RequestBody Portfolio portfolio) {
-        // TODO: implement update logic
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        Portfolio updated = portfolioService.updatePortfolio(id, portfolio);
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/{id}/trades")

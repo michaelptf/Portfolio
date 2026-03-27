@@ -17,6 +17,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -130,5 +131,23 @@ class PortfolioControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Child Portfolio"));
         verify(portfolioService, times(1)).addChildPortfolio(any(Portfolio.class), eq(1L));
+    }
+
+    @Test
+    void testUpdatePortfolio() throws Exception {
+        Portfolio parent = new Portfolio();
+        parent.setName("Parent Portfolio");
+        portfolioRepository.save(parent);
+        Portfolio updated = new Portfolio();
+        updated.setName("Updated Portfolio");
+
+        mockMvc.perform(put("/portfolios/" + parent.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updated)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Portfolio"));
+
+        Portfolio reloaded = portfolioRepository.findById(parent.getId()).orElseThrow();
+        assertThat(reloaded.getName()).isEqualTo("Updated Portfolio");
     }
 }
