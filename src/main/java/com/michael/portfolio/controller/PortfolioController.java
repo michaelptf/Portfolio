@@ -1,4 +1,6 @@
 package com.michael.portfolio.controller;
+import com.michael.portfolio.dto.PortfolioDTO;
+import com.michael.portfolio.dto.TradeDTO;
 import com.michael.portfolio.model.Portfolio;
 import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.service.PortfolioService;
@@ -28,52 +30,52 @@ public class PortfolioController {
 
     @Transactional
     @GetMapping("/{id}")
-    public ResponseEntity<Portfolio> getPortfolioById(@PathVariable long id){
+    public ResponseEntity<PortfolioDTO> getPortfolioById(@PathVariable long id){
         return portfolioService.findPortfolioById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Portfolio> createPortfolio(@RequestBody Portfolio portfolio) {
-        portfolioService.createPortfolio(portfolio);
-        return ResponseEntity.ok(portfolio);
+    public ResponseEntity<PortfolioDTO> createPortfolio(@RequestBody PortfolioDTO portfolioDTO) {
+        portfolioService.createPortfolio(portfolioDTO);
+        return ResponseEntity.ok(portfolioDTO);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Portfolio> deletePortfolio(@PathVariable long id){
+    public ResponseEntity<PortfolioDTO> deletePortfolio(@PathVariable long id){
         portfolioService.deletePortfolio(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/trade")
-    public ResponseEntity<Trade> addTrade(@PathVariable long id, @RequestBody Trade trade){
-        Trade saved = portfolioService.addTradeToPortfolio(id, trade);
+    public ResponseEntity<TradeDTO> addTrade(@PathVariable long id, @RequestBody TradeDTO tradeDTO){
+        TradeDTO saved = portfolioService.addTradeToPortfolio(id, tradeDTO);
         return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/{id}/child")
-    public ResponseEntity<Portfolio> addChildPortfolio(@PathVariable long id, @RequestBody Portfolio childPortfolio){
-        portfolioService.addChildPortfolio(childPortfolio, id);
-        return ResponseEntity.ok(childPortfolio);
+    public ResponseEntity<PortfolioDTO> addChildPortfolio(@PathVariable long id, @RequestBody PortfolioDTO childPortfolioDTO){
+        portfolioService.addChildPortfolio(childPortfolioDTO, id);
+        return ResponseEntity.ok(childPortfolioDTO);
     }
 
     @GetMapping("/{id}/all")
-    public ResponseEntity<List<Portfolio>> getAllChildPortfolios(@PathVariable long id) {
-        List<Portfolio> childList = portfolioService.findAllChildPortfolio(id);
+    public ResponseEntity<List<PortfolioDTO>> getAllChildPortfolios(@PathVariable long id) {
+        List<PortfolioDTO> childList = portfolioService.findAllChildPortfolio(id);
         return ResponseEntity.ok(childList);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Portfolio> updatePortfolio(@PathVariable long id,
-                                                     @RequestBody Portfolio portfolio) {
-        Portfolio updated = portfolioService.updatePortfolio(id, portfolio);
+    public ResponseEntity<PortfolioDTO> updatePortfolio(@PathVariable long id,
+                                                     @RequestBody PortfolioDTO portfolioDTO) {
+        PortfolioDTO updated = portfolioService.updatePortfolio(id, portfolioDTO);
         return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/{id}/trades")
-    public ResponseEntity<List<Trade>> getTrades(@PathVariable long id) {
-        List<Trade> tradeList = portfolioService.getTradesByPortfolio(id);
+    public ResponseEntity<List<TradeDTO>> getTrades(@PathVariable long id) {
+        List<TradeDTO> tradeList = portfolioService.getTradesByPortfolio(id);
         return ResponseEntity.ok(tradeList);
     }
 }

@@ -1,5 +1,9 @@
 package com.michael.portfolio.service;
 
+import com.michael.portfolio.dto.PortfolioDTO;
+import com.michael.portfolio.dto.TradeDTO;
+import com.michael.portfolio.mapper.PortfolioMapper;
+import com.michael.portfolio.mapper.TradeMapper;
 import com.michael.portfolio.model.Portfolio;
 import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.repository.PortfolioRepository;
@@ -21,23 +25,27 @@ public class PortfolioService {
         this.tradeRepository = tradeRepository;
     }
 
-    public Portfolio createPortfolio(Portfolio portfolio) {
-        if(portfolio.getName() == null){
+    public PortfolioDTO createPortfolio(PortfolioDTO portfolioDTO) {
+        if(portfolioDTO.name() == null){
             throw new IllegalArgumentException("Name cannot be empty");
         }
-        return portfolioRepository.save(portfolio);
+        Portfolio entity = PortfolioMapper.toEntity(portfolioDTO);
+        Portfolio saved = portfolioRepository.save(entity);
+        return PortfolioMapper.toDTO(saved);
     }
 
     public void deletePortfolio(Long id) {
         portfolioRepository.deletePortfolioById(id);
     }
 
-    public void addChildPortfolio(Portfolio child, Long parentId) {
+    public void addChildPortfolio(PortfolioDTO childDTO, Long parentId) {
         if (parentId == null) {
             throw new IllegalArgumentException("Parent portfolio ID must not be null");
         }
         Portfolio parent = portfolioRepository.findById(parentId)
                 .orElseThrow(() -> new IllegalArgumentException("Parent not found"));
+
+        Portfolio child = PortfolioMapper.toEntity(childDTO);
 
         if (hasCircularRelation(parent, child)) {
             throw new IllegalArgumentException("Circular relation detected");
@@ -78,9 +86,11 @@ public class PortfolioService {
     }
 
     @Transactional
-    public Trade addTradeToPortfolio(long id, Trade trade) {
+    public TradeDTO addTradeToPortfolio(long id, TradeDTO tradeDTO) {
         Portfolio portfolio = portfolioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
+
+        Trade trade = TradeMapper.toEntity(tradeDTO);
 
         trade.setPortfolio(portfolio);
 
@@ -90,31 +100,43 @@ public class PortfolioService {
         }
         portfolio.getTrades().add(trade);
 
-        // Save the trade (owning side) — cascade is NOT set on Portfolio.trades, so we save explicitly
-        return tradeRepository.save(trade);
+        Trade saved = tradeRepository.save(trade);
+
+        return TradeMapper.toDTO(saved);
 
     }
 
-    public List<Trade> getTradesByPortfolio(long id) {
-        return tradeRepository.findTradesByPortfolioId(id);
+    public List<TradeDTO> getTradesByPortfolio(long id) {
+        return tradeRepository.findTradesByPortfolioId(id)
+                .stream()
+                .map(TradeMapper::toDTO)
+                .toList();
     }
+
 
 
     @Transactional
-    public Optional<Portfolio> findPortfolioById(long id) {
-        return portfolioRepository.findPortfolioById(id);
+    public Optional<PortfolioDTO> findPortfolioById(long id) {
+        return portfolioRepository.findPortfolioById(id)
+                .map(PortfolioMapper::toDTO);
     }
 
-    public List<Portfolio> findAllChildPortfolio(long id){
-        return portfolioRepository.findByParentId(id);
+    public List<PortfolioDTO> findAllChildPortfolio(long id){
+
+        return portfolioRepository.findByParentId(id)
+                .stream()
+                .map(PortfolioMapper::toDTO)
+                .toList();
     }
 
     @Transactional
-    public Portfolio updatePortfolio(long id, Portfolio updatedPortfolio) {
+    public PortfolioDTO updatePortfolio(long id, PortfolioDTO updatedPortfolioDTO) {
         Portfolio existing = portfolioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
 
-        existing.setName(updatedPortfolio.getName());
-        return portfolioRepository.save(existing);
+        existing.setName(updatedPortfolioDTO.name());
+
+        Portfolio saved = portfolioRepository.save(existing);
+        return PortfolioMapper.toDTO(saved);
     }
 }
