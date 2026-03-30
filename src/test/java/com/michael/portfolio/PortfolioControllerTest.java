@@ -45,17 +45,6 @@ class PortfolioControllerTest {
 
     private Portfolio parent;
 
-    @BeforeEach
-    void setup() {
-        tradeRepository.deleteAll();
-        portfolioRepository.deleteAll();
-
-        parent = new Portfolio();
-        parent.setName("Parent Portfolio");
-        portfolioRepository.save(parent);
-
-    }
-
     @Test
     void testSayHello() throws Exception {
         mockMvc.perform(get("/portfolios/hello"))
@@ -118,9 +107,10 @@ class PortfolioControllerTest {
         trade.setProductType("Warrant");
         trade.setQuantity(10);
         trade.setPrice(100.00);
+        trade.setTicker("AAPL");
 
         // Mock service behavior
-        doNothing().when(portfolioService).addTradeToPortfolio(portfolio.getId(), trade);
+        doNothing().when(portfolioService).addTradeToPortfolio(eq(1L), any(Trade.class));
 
         mockMvc.perform(post("/portfolios/1/trade")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -178,9 +168,6 @@ class PortfolioControllerTest {
         trade.setProductType("Warrant");
         trade.setQuantity(10);
         trade.setPrice(100.00);
-
-        parent.setTrades(List.of(trade));
-        parent = portfolioRepository.save(parent);
 
         // Mock service behavior
         when(portfolioService.getTradesByPortfolio(1L)).thenReturn(List.of(trade));

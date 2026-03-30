@@ -4,6 +4,7 @@ import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.service.PortfolioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,7 @@ public class PortfolioController {
         return "Hello World";
     }
 
+    @Transactional
     @GetMapping("/{id}")
     public ResponseEntity<Portfolio> getPortfolioById(@PathVariable long id){
         return portfolioService.findPortfolioById(id)
@@ -46,8 +48,8 @@ public class PortfolioController {
 
     @PostMapping("/{id}/trade")
     public ResponseEntity<Trade> addTrade(@PathVariable long id, @RequestBody Trade trade){
-        portfolioService.addTradeToPortfolio(id, trade);
-        return ResponseEntity.ok(trade);
+        Trade saved = portfolioService.addTradeToPortfolio(id, trade);
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/{id}/child")

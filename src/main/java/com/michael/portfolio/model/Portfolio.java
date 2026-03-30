@@ -1,4 +1,5 @@
 package com.michael.portfolio.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -15,14 +16,26 @@ public class Portfolio {
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
+    @JsonIgnore
     private Portfolio parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Portfolio> children = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "portfolio_id")
+    @JsonIgnore
+    @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Trade> trades = new ArrayList<>();
+
+
+    public void addTrade(Trade trade) {
+        if (trade == null) return;
+        if (this.trades == null) {
+            this.trades = new ArrayList<>();
+        }
+        this.trades.add(trade);
+        trade.setPortfolio(this);
+    }
 
     public Long getId() {
         return id;

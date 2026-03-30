@@ -78,22 +78,29 @@ public class PortfolioService {
     }
 
     @Transactional
-    public void addTradeToPortfolio(long id, Trade trade) {
+    public Trade addTradeToPortfolio(long id, Trade trade) {
         Portfolio portfolio = portfolioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
+
         trade.setPortfolio(portfolio);
-        tradeRepository.save(trade);
+
+        // Synchronize the inverse side (important for bidirectional consistency)
+        if (portfolio.getTrades() == null) {
+            portfolio.setTrades(new ArrayList<>());
+        }
+        portfolio.getTrades().add(trade);
+
+        // Save the trade (owning side) — cascade is NOT set on Portfolio.trades, so we save explicitly
+        return tradeRepository.save(trade);
 
     }
 
     public List<Trade> getTradesByPortfolio(long id) {
-        Optional<Portfolio> portfolio = portfolioRepository.findPortfolioById(id);
-        if(portfolio.isEmpty()){
-            throw new IllegalArgumentException("Portfolio Id doesn't exist");
-        }
-        return portfolio.get().getTrades();
+        return tradeRepository.findTradesByPortfolioId(id);
     }
 
+
+    @Transactional
     public Optional<Portfolio> findPortfolioById(long id) {
         return portfolioRepository.findPortfolioById(id);
     }

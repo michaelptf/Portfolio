@@ -1,13 +1,19 @@
 services:
   mysql:
     image: 'mysql:latest'
+    container_name: portfolio-mysql
     environment:
       - 'MYSQL_ROOT_PASSWORD=Idjdidfc8.'
       - 'MYSQL_DATABASE=portfolio'
     ports:
-      - '3306'
+      - '3307:3306'      # ← Change host port to 3307 (or 3308, 3310, etc.)
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pIdjdidfc8."]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mysql_data:

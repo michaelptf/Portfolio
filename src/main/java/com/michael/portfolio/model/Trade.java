@@ -36,9 +36,6 @@ public class Trade {
     }
 
     public void setId(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("id cannot be null");
-        }
         this.id = id;
     }
 
@@ -47,9 +44,6 @@ public class Trade {
     }
 
     public void setPortfolio(Portfolio portfolio) {
-        if (portfolio == null) {
-            throw new IllegalArgumentException("portfolio cannot be null");
-        }
         this.portfolio = portfolio;
     }
 
@@ -58,9 +52,6 @@ public class Trade {
     }
 
     public void setProductType(String productType) {
-        if (productType == null) {
-            throw new IllegalArgumentException("productType cannot be null");
-        }
         this.productType = productType;
     }
 
@@ -80,9 +71,6 @@ public class Trade {
     }
 
     public void setPrice(double price) {
-        if (price < 0) {
-            throw new IllegalArgumentException("price cannot be negative number");
-        }
         this.price = price;
     }
 
@@ -91,9 +79,6 @@ public class Trade {
     }
 
     public void setTicker(String ticker) {
-        if (ticker == null) {
-            throw new IllegalArgumentException("ticker cannot be null");
-        }
         this.ticker = ticker;
     }
 }
