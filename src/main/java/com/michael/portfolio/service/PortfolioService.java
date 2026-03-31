@@ -2,6 +2,7 @@ package com.michael.portfolio.service;
 
 import com.michael.portfolio.dto.PortfolioDTO;
 import com.michael.portfolio.dto.TradeDTO;
+import com.michael.portfolio.exception.ResourceNotFoundException;
 import com.michael.portfolio.mapper.PortfolioMapper;
 import com.michael.portfolio.mapper.TradeMapper;
 import com.michael.portfolio.model.Portfolio;
@@ -26,9 +27,6 @@ public class PortfolioService {
     }
 
     public PortfolioDTO createPortfolio(PortfolioDTO portfolioDTO) {
-        if(portfolioDTO.name() == null){
-            throw new IllegalArgumentException("Name cannot be empty");
-        }
         Portfolio entity = PortfolioMapper.toEntity(portfolioDTO);
         Portfolio saved = portfolioRepository.save(entity);
         return PortfolioMapper.toDTO(saved);
@@ -38,28 +36,24 @@ public class PortfolioService {
         portfolioRepository.deletePortfolioById(id);
     }
 
-    public void addChildPortfolio(PortfolioDTO childDTO, Long parentId) {
-        if (parentId == null) {
-            throw new IllegalArgumentException("Parent portfolio ID must not be null");
-        }
+    public PortfolioDTO addChildPortfolio(PortfolioDTO childDTO, Long parentId) {
         Portfolio parent = portfolioRepository.findById(parentId)
-                .orElseThrow(() -> new IllegalArgumentException("Parent not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Parent portfolio not found with ID: " + parentId));
 
         Portfolio child = PortfolioMapper.toEntity(childDTO);
 
         if (hasCircularRelation(parent, child)) {
-            throw new IllegalArgumentException("Circular relation detected");
+            throw new BusinessRuleException("Circular relation detected");
         }
-        int depth = calculateDepth(parent);
-        if(depth >= 5){
-            throw new IllegalArgumentException("Portfolio depth cannot exceed 5");
+        if (calculateDepth(parent) >= 5) {
+            throw new BusinessRuleException("Portfolio hierarchy too deep. Maximum depth is 5.");
         }
-        if (parent.getChildren() == null) {
-            parent.setChildren(new ArrayList<>());
-        }
+
         child.setParent(parent);
         parent.getChildren().add(child);
-        portfolioRepository.save(parent);
+
+        Portfolio savedChild = portfolioRepository.save(child);
+        return PortfolioMapper.toDTO(savedChild);
 
     }
 
@@ -132,7 +126,7 @@ public class PortfolioService {
     @Transactional
     public PortfolioDTO updatePortfolio(long id, PortfolioDTO updatedPortfolioDTO) {
         Portfolio existing = portfolioRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio with ID " + id + " was not found"));
 
         existing.setName(updatedPortfolioDTO.name());
 

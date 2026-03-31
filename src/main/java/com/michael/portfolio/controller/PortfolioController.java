@@ -4,6 +4,7 @@ import com.michael.portfolio.dto.TradeDTO;
 import com.michael.portfolio.model.Portfolio;
 import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.service.PortfolioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,9 +38,9 @@ public class PortfolioController {
     }
 
     @PostMapping
-    public ResponseEntity<PortfolioDTO> createPortfolio(@RequestBody PortfolioDTO portfolioDTO) {
-        portfolioService.createPortfolio(portfolioDTO);
-        return ResponseEntity.ok(portfolioDTO);
+    public ResponseEntity<PortfolioDTO> createPortfolio(@Valid @RequestBody PortfolioDTO portfolioDTO) {
+        PortfolioDTO saved = portfolioService.createPortfolio(portfolioDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @DeleteMapping("/{id}")
@@ -55,9 +56,13 @@ public class PortfolioController {
     }
 
     @PostMapping("/{id}/child")
-    public ResponseEntity<PortfolioDTO> addChildPortfolio(@PathVariable long id, @RequestBody PortfolioDTO childPortfolioDTO){
-        portfolioService.addChildPortfolio(childPortfolioDTO, id);
-        return ResponseEntity.ok(childPortfolioDTO);
+    public ResponseEntity<PortfolioDTO> addChildPortfolio(
+            @PathVariable("id") Long parentId,
+            @Valid @RequestBody PortfolioDTO childDTO) {
+
+        PortfolioDTO savedChild = portfolioService.addChildPortfolio(childDTO, parentId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedChild);
     }
 
     @GetMapping("/{id}/all")
