@@ -2,6 +2,7 @@ package com.michael.portfolio.service;
 
 import com.michael.portfolio.dto.PortfolioDTO;
 import com.michael.portfolio.dto.TradeDTO;
+import com.michael.portfolio.exception.BusinessRuleException;
 import com.michael.portfolio.exception.ResourceNotFoundException;
 import com.michael.portfolio.mapper.PortfolioMapper;
 import com.michael.portfolio.mapper.TradeMapper;

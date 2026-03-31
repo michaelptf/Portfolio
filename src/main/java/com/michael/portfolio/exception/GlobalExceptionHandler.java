@@ -43,4 +43,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<Map<String, Object>> handleBusinessRules(BusinessRuleException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", ex.getMessage());
+        body.put("type", "BUSINESS_RULE_VIOLATION");
+
+        // 422 Unprocessable Entity is often used for business logic errors,
+        // but 400 Bad Request is also very common.
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
 }
