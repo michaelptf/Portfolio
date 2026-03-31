@@ -2,6 +2,8 @@ package com.michael.portfolio;
 
 
 import com.michael.portfolio.controller.PortfolioController;
+import com.michael.portfolio.dto.PortfolioDTO;
+import com.michael.portfolio.dto.TradeDTO;
 import com.michael.portfolio.model.Portfolio;
 
 import com.michael.portfolio.model.Trade;
@@ -54,12 +56,10 @@ class PortfolioControllerTest {
 
     @Test
     void testGetPortfolioEndpoint() throws Exception {
-        Portfolio portfolio = new Portfolio();
-        portfolio.setId(1L);
-        portfolio.setName("Root Portfolio");
+        PortfolioDTO portfolioDTO = new PortfolioDTO(1L, "Root Portfolio");
 
         // Mock service behavior
-        when(portfolioService.findPortfolioById(1L)).thenReturn(Optional.of(portfolio));
+        when(portfolioService.findPortfolioById(1L)).thenReturn(Optional.of(portfolioDTO));
 
         mockMvc.perform(get("/portfolios/1"))
                 .andExpect(status().isOk())
@@ -68,16 +68,14 @@ class PortfolioControllerTest {
 
     @Test
     void testCreatePortfolioEndpoint() throws Exception {
-        Portfolio portfolio = new Portfolio();
-        portfolio.setId(1L);
-        portfolio.setName("Root Portfolio");
+        PortfolioDTO portfolioDTO = new PortfolioDTO(1L, "Root Portfolio");
 
         // Mock service behavior
-        when(portfolioService.createPortfolio(portfolio)).thenReturn(portfolio);
+        when(portfolioService.createPortfolio(portfolioDTO)).thenReturn(portfolioDTO);
 
         mockMvc.perform(post("/portfolios")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(portfolio)))
+                        .content(objectMapper.writeValueAsString(portfolioDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Root Portfolio"));
     }
@@ -110,52 +108,48 @@ class PortfolioControllerTest {
         trade.setTicker("AAPL");
 
         // Mock service behavior
-        doNothing().when(portfolioService).addTradeToPortfolio(eq(1L), any(Trade.class));
+        doNothing().when(portfolioService).addTradeToPortfolio(eq(1L), any(TradeDTO.class));
 
         mockMvc.perform(post("/portfolios/1/trade")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(trade)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.productType").value("Warrant"));
-        verify(portfolioService, times(1)).addTradeToPortfolio(eq(1L), any(Trade.class));
+        verify(portfolioService, times(1)).addTradeToPortfolio(eq(1L), any(TradeDTO.class));
     }
 
     @Test
     void testAddPortfolioToPortfolio() throws Exception {
-        Portfolio portfolio = new Portfolio();
-        portfolio.setId(1L);
-        portfolio.setName("Root Portfolio");
 
-        Portfolio childPortfolio = new Portfolio();
-        childPortfolio.setId(2L);
-        childPortfolio.setName("Child Portfolio");
+        PortfolioDTO portfolioDTO = new PortfolioDTO(1L, "Root Portfolio");
+
+        PortfolioDTO childPortfolioTO = new PortfolioDTO(2L, "Child Portfolio");
 
 
         // Mock service behavior
-        doNothing().when(portfolioService).addChildPortfolio(childPortfolio, portfolio.getId());
+        doNothing().when(portfolioService).addChildPortfolio(childPortfolioTO, portfolioDTO.id());
 
         mockMvc.perform(post("/portfolios/1/child")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(childPortfolio)))
+                        .content(objectMapper.writeValueAsString(childPortfolioTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Child Portfolio"));
-        verify(portfolioService, times(1)).addChildPortfolio(any(Portfolio.class), eq(1L));
+        verify(portfolioService, times(1)).addChildPortfolio(any(PortfolioDTO.class), eq(1L));
     }
 
     @Test
     void testUpdatePortfolio() throws Exception {
 
         parent = portfolioRepository.save(parent);
-        Portfolio updated = new Portfolio();
-        updated.setId(1L);
-        updated.setName("Updated Portfolio");
+        PortfolioDTO updatedDTO = new PortfolioDTO(1L, "Updated Portfolio");
 
-        when(portfolioService.updatePortfolio(eq(1L), any(Portfolio.class)))
-                .thenReturn(updated);
+
+        when(portfolioService.updatePortfolio(eq(1L), any(PortfolioDTO.class)))
+                .thenReturn(updatedDTO);
 
         mockMvc.perform(put("/portfolios/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updated)))
+                        .content(objectMapper.writeValueAsString(updatedDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Updated Portfolio"));
 
@@ -163,14 +157,10 @@ class PortfolioControllerTest {
 
     @Test
     void testGetTrades() throws Exception {
-        Trade trade = new Trade();
-        trade.setId(1L);
-        trade.setProductType("Warrant");
-        trade.setQuantity(10);
-        trade.setPrice(100.00);
+        TradeDTO tradeDTO = new TradeDTO(1L, "Warrant", 10, 100.00, "W-100");
 
         // Mock service behavior
-        when(portfolioService.getTradesByPortfolio(1L)).thenReturn(List.of(trade));
+        when(portfolioService.getTradesByPortfolio(1L)).thenReturn(List.of(tradeDTO));
 
         mockMvc.perform(get("/portfolios/1/trades"))
                 .andExpect(status().isOk())

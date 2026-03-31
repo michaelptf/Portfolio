@@ -1,5 +1,9 @@
 package com.michael.portfolio;
 
+import com.michael.portfolio.dto.PortfolioDTO;
+import com.michael.portfolio.dto.TradeDTO;
+import com.michael.portfolio.mapper.PortfolioMapper;
+import com.michael.portfolio.mapper.TradeMapper;
 import com.michael.portfolio.model.Portfolio;
 import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.repository.PortfolioRepository;
@@ -27,15 +31,18 @@ public class PortfolioServiceTest {
 
     private Portfolio root;
     private Portfolio child;
+    private PortfolioDTO rootDTO;
+    private PortfolioDTO childDTO;
 
     @BeforeEach
     void setUp(){
         //Arrange
-        root = new Portfolio();
-        root.setName("Root Portfolio");
+        rootDTO = new PortfolioDTO(1L, "Root Portfolio");
+        root = PortfolioMapper.toEntity(rootDTO);
 
-        child = new Portfolio();
-        child.setName("Child");
+
+        childDTO = new PortfolioDTO(1L, "Child");
+        child = PortfolioMapper.toEntity(childDTO);
         child.setParent(root);
 
         List<Portfolio> children = new ArrayList<>();
@@ -46,10 +53,10 @@ public class PortfolioServiceTest {
     @Test
     void testCreatePortfolio(){
         //Act
-        Portfolio saved = portfolioService.createPortfolio(root);
+        PortfolioDTO saved = portfolioService.createPortfolio(rootDTO);
 
         //Assert
-        Optional<Portfolio> found = portfolioRepository.findPortfolioById(saved.getId());
+        Optional<Portfolio> found = portfolioRepository.findPortfolioById(saved.id());
         assertTrue(found.isPresent());
         assertEquals("Root Portfolio", found.get().getName());
         assertEquals(1, found.get().getChildren().size());
@@ -60,13 +67,12 @@ public class PortfolioServiceTest {
     @Test
     void testAddChildPortfolio(){
         //Act
-        Portfolio saved = portfolioService.createPortfolio(root);
-        Portfolio child2 = new Portfolio();
-        child2.setName("Child2");
-        portfolioService.addChildPortfolio(child2, saved.getId());
+        PortfolioDTO saved = portfolioService.createPortfolio(rootDTO);
+        PortfolioDTO child2 = new PortfolioDTO(2L, "Child2");
+        portfolioService.addChildPortfolio(child2, saved.id());
 
         //Assert
-        Optional<Portfolio> found = portfolioRepository.findPortfolioById(saved.getId());
+        Optional<Portfolio> found = portfolioRepository.findPortfolioById(saved.id());
         assertTrue(found.isPresent());
         assertEquals(2, found.get().getChildren().size());
         assertEquals("Child2", found.get().getChildren().get(1).getName());
@@ -90,9 +96,11 @@ public class PortfolioServiceTest {
         Portfolio tooDeep = new Portfolio();
         tooDeep.setName("Too Deep");
 
+        PortfolioDTO tooDeepDTO = PortfolioMapper.toDTO(tooDeep);
+
         Portfolio finalCurrent = current;
         assertThrows(IllegalArgumentException.class, () -> {
-            portfolioService.addChildPortfolio(tooDeep, finalCurrent.getId()); // finalCurrent is depth 5
+            portfolioService.addChildPortfolio(tooDeepDTO, finalCurrent.getId()); // finalCurrent is depth 5
         });
 
 
@@ -101,7 +109,7 @@ public class PortfolioServiceTest {
     @Test
     void testDeletePortfolio() {
         //Act
-        Portfolio saved = portfolioService.createPortfolio(root);
+        Portfolio saved = PortfolioMapper.toEntity(portfolioService.createPortfolio(rootDTO));
         Long childId = child.getId();
         portfolioRepository.save(saved);
         portfolioService.deletePortfolio(saved.getId());
@@ -118,17 +126,17 @@ public class PortfolioServiceTest {
     @Test
     void testAddTradeToPortfolio() {
         // Arrange
-        Portfolio saved = portfolioService.createPortfolio(root);
+        PortfolioDTO saved = portfolioService.createPortfolio(rootDTO);
         Trade trade = new Trade();
         trade.setProductType("ETF");
         trade.setQuantity(100);
         trade.setPrice(50.0);
 
         // Act
-        portfolioService.addTradeToPortfolio(saved.getId(), trade);
+        portfolioService.addTradeToPortfolio(saved.id(), TradeMapper.toDTO(trade));
 
         // Assert
-        Optional<Portfolio> found = portfolioRepository.findPortfolioById(saved.getId());
+        Optional<Portfolio> found = portfolioRepository.findPortfolioById(saved.id());
         assertTrue(found.isPresent());
         assertEquals(1, found.get().getTrades().size());
         assertEquals("ETF", found.get().getTrades().get(0).getProductType());
@@ -137,27 +145,27 @@ public class PortfolioServiceTest {
     @Test
     void testFetchTradesByPortfolio() {
         // Arrange
-        Portfolio saved = portfolioService.createPortfolio(root);
+        PortfolioDTO saved = portfolioService.createPortfolio(rootDTO);
         Trade trade1 = new Trade("ETF", 100, 50.0);
         Trade trade2 = new Trade("Bond", 200, 100.0);
-        portfolioService.addTradeToPortfolio(saved.getId(), trade1);
-        portfolioService.addTradeToPortfolio(saved.getId(), trade2);
+        portfolioService.addTradeToPortfolio(saved.id(), TradeMapper.toDTO(trade1));
+        portfolioService.addTradeToPortfolio(saved.id(), TradeMapper.toDTO(trade2));
 
         // Act
-        List<Trade> trades = portfolioService.getTradesByPortfolio(saved.getId());
+        List<TradeDTO> trades = portfolioService.getTradesByPortfolio(saved.id());
 
         // Assert
         assertEquals(2, trades.size());
-        assertEquals("ETF", trades.get(0).getProductType());
-        assertEquals("Bond", trades.get(1).getProductType());
+        assertEquals("ETF", trades.get(0).productType());
+        assertEquals("Bond", trades.get(1).productType());
     }
 
     @Test
     void testRejectNegativeTradeQuantity() {
-        Portfolio saved = portfolioService.createPortfolio(root);
+        PortfolioDTO saved = portfolioService.createPortfolio(rootDTO);
         assertThrows(IllegalArgumentException.class, () -> {
             Trade invalidTrade = new Trade("ETF", -10, 50.0);
-            portfolioService.addTradeToPortfolio(saved.getId(), invalidTrade);
+            portfolioService.addTradeToPortfolio(saved.id(), TradeMapper.toDTO(invalidTrade));
         });
     }
 
@@ -165,16 +173,16 @@ public class PortfolioServiceTest {
     void testRejectPortfolioWithoutName() {
         Portfolio unnamed = new Portfolio();
         assertThrows(IllegalArgumentException.class, () -> {
-            portfolioService.createPortfolio(unnamed);
+            portfolioService.createPortfolio(PortfolioMapper.toDTO(unnamed));
         });
     }
 
     @Test
     void testRejectCircularRelation() {
-        Portfolio saved = portfolioService.createPortfolio(root);
+        PortfolioDTO saved = portfolioService.createPortfolio(rootDTO);
         // Trying to set root as its own child
         assertThrows(IllegalArgumentException.class, () -> {
-            portfolioService.addChildPortfolio(root, root.getId());
+            portfolioService.addChildPortfolio(rootDTO, root.getId());
         });
     }
 

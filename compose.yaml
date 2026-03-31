@@ -6,7 +6,7 @@ services:
       - 'MYSQL_ROOT_PASSWORD=Idjdidfc8.'
       - 'MYSQL_DATABASE=portfolio'
     ports:
-      - '3307:3306'      # ← Change host port to 3307 (or 3308, 3310, etc.)
+      - '3307:3306'
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
