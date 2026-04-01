@@ -33,6 +33,7 @@ public class PortfolioService {
         return PortfolioMapper.toDTO(saved);
     }
 
+    @Transactional
     public void deletePortfolio(Long id) {
         if (!portfolioRepository.existsById(id)) {
             throw new ResourceNotFoundException("Cannot delete. Portfolio not found with id: " + id);
