@@ -48,10 +48,10 @@ class PortfolioControllerTest {
     private Portfolio parent;
 
     @Test
-    void testSayHello() throws Exception {
-        mockMvc.perform(get("/portfolios/hello"))
+    void testHealthCheck() throws Exception {
+        mockMvc.perform(get("/portfolios/hc"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Hello World"));
+                .andExpect(content().string("Health Check: Success"));
     }
 
     @Test
@@ -76,7 +76,7 @@ class PortfolioControllerTest {
         mockMvc.perform(post("/portfolios")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(portfolioDTO)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Root Portfolio"));
     }
 
@@ -96,45 +96,45 @@ class PortfolioControllerTest {
 
     @Test
     void testAddTradeToPortfolio() throws Exception {
-        Portfolio portfolio = new Portfolio();
-        portfolio.setId(1L);
-        portfolio.setName("Root Portfolio");
 
-        Trade trade = new Trade();
-        trade.setId(1L);
-        trade.setProductType("Warrant");
-        trade.setQuantity(10);
-        trade.setPrice(100.00);
-        trade.setTicker("AAPL");
+        //Arrange: Use DTOs for the API test
+        Long portfolioId = 1L;
+        TradeDTO tradeDTO = new TradeDTO(1L, "Warrant", 10, 100.00, "AAPL");
 
-        // Mock service behavior
-        doNothing().when(portfolioService).addTradeToPortfolio(eq(1L), any(TradeDTO.class));
+        //Mock: Tell Mockito to RETURN the DTO
+        when(portfolioService.addTradeToPortfolio(eq(portfolioId), any(TradeDTO.class)))
+                .thenReturn(tradeDTO);
 
         mockMvc.perform(post("/portfolios/1/trade")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(trade)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productType").value("Warrant"));
-        verify(portfolioService, times(1)).addTradeToPortfolio(eq(1L), any(TradeDTO.class));
+                        .content(objectMapper.writeValueAsString(tradeDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.productType").value("Warrant"))
+                .andExpect(jsonPath("$.ticker").value("AAPL"));
+        verify(portfolioService, times(1)).addTradeToPortfolio(eq(portfolioId), any(TradeDTO.class));
     }
 
     @Test
     void testAddPortfolioToPortfolio() throws Exception {
 
-        PortfolioDTO portfolioDTO = new PortfolioDTO(1L, "Root Portfolio");
+        //Arrange: Prepare the data
+        Long parentId = 1L;
+        PortfolioDTO childDTO = new PortfolioDTO(2L, "Child Portfolio");
 
-        PortfolioDTO childPortfolioTO = new PortfolioDTO(2L, "Child Portfolio");
+        //Mock service behavior: It must RETURN a DTO for the Controller to work
+        when(portfolioService.addChildPortfolio(any(PortfolioDTO.class), eq(parentId)))
+                .thenReturn(childDTO);
 
 
-        // Mock service behavior
-        doNothing().when(portfolioService).addChildPortfolio(childPortfolioTO, portfolioDTO.id());
 
         mockMvc.perform(post("/portfolios/1/child")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(childPortfolioTO)))
-                .andExpect(status().isOk())
+                        .content(objectMapper.writeValueAsString(childDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(2))
                 .andExpect(jsonPath("$.name").value("Child Portfolio"));
-        verify(portfolioService, times(1)).addChildPortfolio(any(PortfolioDTO.class), eq(1L));
+        verify(portfolioService, times(1)).addChildPortfolio(any(PortfolioDTO.class), eq(parentId));
     }
 
     @Test
