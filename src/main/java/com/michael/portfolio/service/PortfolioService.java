@@ -45,7 +45,8 @@ public class PortfolioService {
         Portfolio parent = portfolioRepository.findById(parentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Parent portfolio not found with ID: " + parentId));
 
-        Portfolio child = PortfolioMapper.toEntity(childDTO);
+        Portfolio child = portfolioRepository.findById(childDTO.id())
+                .orElseThrow(() -> new ResourceNotFoundException("Child portfolio not found with ID: " + childDTO.id()));
 
         if (hasCircularRelation(parent, child)) {
             throw new BusinessRuleException("Circular relation detected");
@@ -74,9 +75,13 @@ public class PortfolioService {
     }
 
     private boolean hasCircularRelation(Portfolio parent, Portfolio child) {
+        if (child.getId() == null) {
+            return false;
+        }
+
         Portfolio current = parent;
         while (current != null) {
-            if (current.equals(child)) {
+            if (current.getId().equals(child.getId())) {
                 return true; // circular detected
             }
             current = current.getParent();
