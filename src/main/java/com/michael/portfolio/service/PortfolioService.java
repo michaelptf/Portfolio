@@ -34,6 +34,9 @@ public class PortfolioService {
     }
 
     public void deletePortfolio(Long id) {
+        if (!portfolioRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Cannot delete. Portfolio not found with id: " + id);
+        }
         portfolioRepository.deletePortfolioById(id);
     }
 
@@ -102,6 +105,9 @@ public class PortfolioService {
     }
 
     public List<TradeDTO> getTradesByPortfolio(long id) {
+        if (!portfolioRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Portfolio not found with id: " + id);
+        }
         return tradeRepository.findTradesByPortfolioId(id)
                 .stream()
                 .map(TradeMapper::toDTO)

@@ -1,6 +1,7 @@
 package com.michael.portfolio.controller;
 import com.michael.portfolio.dto.PortfolioDTO;
 import com.michael.portfolio.dto.TradeDTO;
+import com.michael.portfolio.exception.ResourceNotFoundException;
 import com.michael.portfolio.model.Portfolio;
 import com.michael.portfolio.model.Trade;
 import com.michael.portfolio.service.PortfolioService;
@@ -8,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/portfolios")
+@Validated
 public class PortfolioController {
     private final PortfolioService portfolioService;
 
@@ -24,17 +27,16 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    @GetMapping("/hello")
-    public String sayHello() {
-        return "Hello World";
+    @GetMapping("/hc")
+    public String getHealthCheck() {
+        return "Health Check: Success";
     }
 
-    @Transactional
     @GetMapping("/{id}")
     public ResponseEntity<PortfolioDTO> getPortfolioById(@PathVariable long id){
         return portfolioService.findPortfolioById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Portfolio not found with id: " + id));
     }
 
     @PostMapping
@@ -52,7 +54,7 @@ public class PortfolioController {
     @PostMapping("/{id}/trade")
     public ResponseEntity<TradeDTO> addTrade(@PathVariable long id, @RequestBody TradeDTO tradeDTO){
         TradeDTO saved = portfolioService.addTradeToPortfolio(id, tradeDTO);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PostMapping("/{id}/child")
@@ -73,7 +75,7 @@ public class PortfolioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PortfolioDTO> updatePortfolio(@PathVariable long id,
-                                                     @RequestBody PortfolioDTO portfolioDTO) {
+                                                        @Valid @RequestBody PortfolioDTO portfolioDTO) {
         PortfolioDTO updated = portfolioService.updatePortfolio(id, portfolioDTO);
         return ResponseEntity.ok(updated);
     }
